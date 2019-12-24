@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"context"
 	"fmt"
 	"syscall"
 
@@ -9,13 +8,14 @@ import (
 	"github.com/titpetric/factory"
 	"golang.org/x/crypto/ssh/terminal"
 
+	"github.com/cortezaproject/corteza-server/pkg/auth"
 	"github.com/cortezaproject/corteza-server/pkg/cli"
 	"github.com/cortezaproject/corteza-server/system/repository"
 	"github.com/cortezaproject/corteza-server/system/service"
 	"github.com/cortezaproject/corteza-server/system/types"
 )
 
-func Users(ctx context.Context, c *cli.Config) *cobra.Command {
+func Users() *cobra.Command {
 	var (
 		flagNoPassword bool
 	)
@@ -31,10 +31,9 @@ func Users(ctx context.Context, c *cli.Config) *cobra.Command {
 		Use:   "list",
 		Short: "List users",
 		Run: func(cmd *cobra.Command, args []string) {
-			c.InitServices(ctx, c)
-
 			var (
-				db = factory.Database.MustGet("system")
+				ctx = auth.SetSuperUserContext(cli.Context())
+				db  = factory.Database.MustGet("system", "default")
 			)
 
 			userRepo := repository.User(ctx, db)
@@ -71,10 +70,10 @@ func Users(ctx context.Context, c *cli.Config) *cobra.Command {
 		Short: "Add new user",
 		Args:  cobra.MinimumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			c.InitServices(ctx, c)
-
 			var (
-				db = factory.Database.MustGet("system")
+				ctx = auth.SetSuperUserContext(cli.Context())
+
+				db = factory.Database.MustGet("system", "default")
 
 				userRepo = repository.User(ctx, db)
 				authSvc  = service.Auth(ctx)
@@ -126,10 +125,9 @@ func Users(ctx context.Context, c *cli.Config) *cobra.Command {
 		Short: "Change password for user",
 		Args:  cobra.MinimumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			c.InitServices(ctx, c)
-
 			var (
-				db = factory.Database.MustGet("system")
+				ctx = auth.SetSuperUserContext(cli.Context())
+				db  = factory.Database.MustGet("system", "default")
 
 				userRepo = repository.User(ctx, db)
 				authSvc  = service.Auth(ctx)
